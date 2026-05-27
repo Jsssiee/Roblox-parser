@@ -185,7 +185,7 @@ function Module:MakePathString(Data: table): (string, number)
 	end
 
 	--// Make the path string
-	for Index, Object in next, Parents do
+	for Index, Object in ipairs(Parents) do
 		local String = Formatter:ObjectToString(Object)
 
 		--// Check for an existing variable

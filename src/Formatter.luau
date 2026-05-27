@@ -47,13 +47,63 @@ Module.Formats = {
 	["NumberRange"] = function(self, Value)
 		local Min = self:Format(Value.Min)
 		local Max = self:Format(Value.Max)
+
+		if Value.Min == Value.Max then
+			return `NumberRange.new({Min})`
+		end
+
 		return `NumberRange.new({Min}, {Max})`
 	end,
 	["NumberSequenceKeypoint"] = function(self, Value)
 		return `NumberSequenceKeypoint.new({Value.Time}, {Value.Value}, {Value.Envelope})`
 	end,
 	["ColorSequenceKeypoint"] = function(self, Value)
-		return `ColorSequenceKeypoint.new({Value.Time}, {Value.Value})`
+		local Color = self:Format(Value.Value)
+		return `ColorSequenceKeypoint.new({Value.Time}, {Color})`
+	end,
+	["NumberSequence"] = function(self, Value)
+		local Keypoints = {}
+		for _, Keypoint in next, Value.Keypoints do
+			table.insert(Keypoints, self:Format(Keypoint))
+		end
+		return `NumberSequence.new({table.concat(Keypoints, ", ")})`
+	end,
+	["ColorSequence"] = function(self, Value)
+		local Keypoints = {}
+		for _, Keypoint in next, Value.Keypoints do
+			table.insert(Keypoints, self:Format(Keypoint))
+		end
+		return `ColorSequence.new({table.concat(Keypoints, ", ")})`
+	end,
+	["Rect"] = function(self, Value)
+		return `Rect.new({Value.Min.X}, {Value.Min.Y}, {Value.Max.X}, {Value.Max.Y})`
+	end,
+	["Region3"] = function(self, Value)
+		local Min = self:Format(Value.CFrame.Position - (Value.Size / 2))
+		local Max = self:Format(Value.CFrame.Position + (Value.Size / 2))
+		return `Region3.new({Min}, {Max})`
+	end,
+	["Region3int16"] = function(self, Value)
+		local Min = self:Format(Value.Min)
+		local Max = self:Format(Value.Max)
+		return `Region3int16.new({Min}, {Max})`
+	end,
+	["Axes"] = function(self, Value)
+		local Axes = {}
+		if Value.X then table.insert(Axes, "Enum.Axis.X") end
+		if Value.Y then table.insert(Axes, "Enum.Axis.Y") end
+		if Value.Z then table.insert(Axes, "Enum.Axis.Z") end
+		return `Axes.new({table.concat(Axes, ", ")})`
+	end,
+	["Faces"] = function(self, Value)
+		local Faces = {}
+		if Value.Top then table.insert(Faces, "Enum.NormalId.Top") end
+		if Value.Bottom then table.insert(Faces, "Enum.NormalId.Bottom") end
+		if Value.Left then table.insert(Faces, "Enum.NormalId.Left") end
+		if Value.Right then table.insert(Faces, "Enum.NormalId.Right") end
+		if Value.Front then table.insert(Faces, "Enum.NormalId.Front") end
+		if Value.Back then table.insert(Faces, "Enum.NormalId.Back") end
+		return `Faces.new({table.concat(Faces, ", ")})`
 	end,
 	["PathWaypoint"] = function(self, Value)
 		local Position = self:Format(Value.Position)
@@ -112,11 +162,18 @@ Module.Formats = {
 		local IsDefaultDirection = Value.EasingDirection == DefaultTween.EasingDirection
 		local Time = math.round(Value.Time * 100) / 100
 
-		if IsDefaultStyle and IsDefaultDirection then
+		local Repeat = Value.RepeatCount
+		local Reverses = tostring(Value.Reverses)
+		local Delay = Value.DelayTime
+
+		if IsDefaultStyle and IsDefaultDirection and Repeat == 0 and not Value.Reverses and Delay == 0 then
 			return `TweenInfo.new({Time})`
 		end
 
-		return `TweenInfo.new({Time}, {Style}, {Direction})`
+		return `TweenInfo.new({Time}, {Style}, {Direction}, {Repeat}, {Reverses}, {Delay})`
+	end,
+	["nil"] = function()
+		return "nil"
 	end,
 	["boolean"] = `%s`,
 	["Instance"] = function(self, Object: Instance)
@@ -149,6 +206,9 @@ Module.Formats = {
 	["RBXScriptSignal"] = function(self, Value, Data)
 		local Name = tostring(Value):match(" (%a+)")
 		return `nil --[[Signal: {Name}]]`
+	end,
+	["RBXScriptConnection"] = function(self, Value, Data)
+		return `nil --[[Connection]]`
 	end,
 }
 
