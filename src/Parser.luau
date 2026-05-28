@@ -59,8 +59,23 @@ function Module:ParseTableIntoString(Data: ParseTableIntoStringData): (string, n
 	local TableString = `{not NoBrackets and "{" or ""}\n`
 
 	--// Generate string
+	local Keys = {}
+	for Key in next, Table do
+		table.insert(Keys, Key)
+	end
+
+	table.sort(Keys, function(A, B)
+		if typeof(A) == typeof(B) then
+			if typeof(A) == "number" or typeof(A) == "string" then
+				return A < B
+			end
+		end
+		return typeof(A) < typeof(B)
+	end)
+
 	local Position = 0
-	for Index, Value in next, Table do
+	for _, Index in ipairs(Keys) do
+		local Value = Table[Index]
 		Position += 1
 
 		local ValueString = Formatter:Format(Value, Data)

@@ -119,10 +119,10 @@ Module.Formats = {
 		return `Ray.new({Origin}, {Direction})`
 	end,
 	["UDim2"] = function(self, Value)
-		return `UDim2.new({Value.X.Scale},{Value.X.Offset},{Value.Y.Scale},{Value.Y.Offset})`
+		return `UDim2.new({Value.X.Scale}, {Value.X.Offset}, {Value.Y.Scale}, {Value.Y.Offset})`
 	end,
 	["UDim"] = function(self, Value)
-		return `UDim.new({Value.Scale},{Value.Offset})`
+		return `UDim.new({Value.Scale}, {Value.Offset})`
 	end,
 	["BrickColor"] = function(self, Value)
 		return `BrickColor.new("{Value.Name}")`
